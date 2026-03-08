@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://tracker-db:5432/tracker_db}
+    username: ${SPRING_DATASOURCE_USERNAME:tracker_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:tracker_password}
+  jpa:
+    show-sql: false
+
+book-service:
+  url: ${BOOK_SERVICE_URL:http://book-service:8082}
+
+logging:
+  level:
+    root: INFO

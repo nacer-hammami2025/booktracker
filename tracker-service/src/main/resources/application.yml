@@ -1,0 +1,32 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: tracker-service
+  datasource:
+    url: jdbc:postgresql://localhost:5434/tracker_db
+    username: tracker_user
+    password: tracker_password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+book-service:
+  url: http://localhost:8082
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    root: INFO
+    com.booktracker.tracker: DEBUG

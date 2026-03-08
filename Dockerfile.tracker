@@ -1,0 +1,17 @@
+# Version simplifiée - Build complet en une seule commande
+FROM maven:3.9-eclipse-temurin-17-alpine AS build
+
+# Copier tout le projet
+WORKDIR /workspace
+COPY . .
+
+# Build seulement tracker-service
+WORKDIR /workspace
+RUN mvn clean install -pl tracker-service -am -DskipTests
+
+# Run stage
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /workspace/tracker-service/target/*.jar app.jar
+EXPOSE 8083
+ENTRYPOINT ["java", "-jar", "app.jar"]

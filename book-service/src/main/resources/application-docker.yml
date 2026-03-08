@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://book-db:5432/book_db}
+    username: ${SPRING_DATASOURCE_USERNAME:book_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:book_password}
+  jpa:
+    show-sql: false
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+logging:
+  level:
+    root: INFO
+    com.booktracker.book: INFO

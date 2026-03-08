@@ -1,0 +1,92 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        # ==================== AUTH SERVICE ====================
+        - id: auth-service-register
+          uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
+          predicates:
+            - Path=/api/auth/register
+            - Method=POST
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /api/auth/$\{segment}
+        
+        - id: auth-service-login
+          uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
+          predicates:
+            - Path=/api/auth/login
+            - Method=POST
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /api/auth/$\{segment}
+        
+        - id: auth-service-profile
+          uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /api/auth/$\{segment}
+            - Authentication
+        
+        # ==================== BOOK SERVICE ====================
+        - id: book-service-public
+          uri: ${BOOK_SERVICE_URL:http://book-service:8082}
+          predicates:
+            - Path=/api/books/search, /api/books/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/books/(?<segment>.*), /api/books/$\{segment}
+        
+        - id: book-service-protected
+          uri: ${BOOK_SERVICE_URL:http://book-service:8082}
+          predicates:
+            - Path=/api/books/**
+          filters:
+            - RewritePath=/api/books/(?<segment>.*), /api/books/$\{segment}
+            - Authentication
+        
+        # ==================== TRACKER SERVICE ====================
+        - id: tracker-service-user-books
+          uri: ${TRACKER_SERVICE_URL:http://tracker-service:8083}
+          predicates:
+            - Path=/api/user-books/**
+          filters:
+            - RewritePath=/api/user-books/(?<segment>.*), /api/user-books/$\{segment}
+            - Authentication
+        
+        - id: tracker-service-reviews
+          uri: ${TRACKER_SERVICE_URL:http://tracker-service:8083}
+          predicates:
+            - Path=/api/reviews/**
+          filters:
+            - RewritePath=/api/reviews/(?<segment>.*), /api/reviews/$\{segment}
+            - Authentication
+        
+        - id: tracker-service
+          uri: ${TRACKER_SERVICE_URL:http://tracker-service:8083}
+          predicates:
+            - Path=/api/tracker/**
+          filters:
+            - RewritePath=/api/tracker/(?<segment>.*), /api/tracker/$\{segment}
+            - Authentication
+        
+        # ==================== RECO SERVICE ====================
+        - id: reco-service
+          uri: ${RECO_SERVICE_URL:http://reco-service:8084}
+          predicates:
+            - Path=/api/recommendations/**
+          filters:
+            - RewritePath=/api/recommendations/(?<segment>.*), /api/recommendations/$\{segment}
+            - Authentication
+        
+        - id: reco-service-stats
+          uri: ${RECO_SERVICE_URL:http://reco-service:8084}
+          predicates:
+            - Path=/api/statistics/**
+          filters:
+            - RewritePath=/api/statistics/(?<segment>.*), /api/statistics/$\{segment}
+            - Authentication
+
+logging:
+  level:
+    root: INFO
+    com.booktracker.gateway: INFO

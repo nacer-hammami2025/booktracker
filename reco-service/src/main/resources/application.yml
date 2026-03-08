@@ -1,0 +1,39 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: reco-service
+  datasource:
+    url: jdbc:postgresql://localhost:5435/reco_db
+    username: reco_user
+    password: reco_password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+book-service:
+  url: http://localhost:8082
+
+tracker-service:
+  url: http://localhost:8083
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    root: INFO
+    com.booktracker.reco: DEBUG

@@ -1,0 +1,14 @@
+# Auth Service - Version Développement (plus rapide)
+FROM maven:3.9-eclipse-temurin-17-alpine
+WORKDIR /app
+
+# Copier le POM parent
+COPY pom.xml /app-root/pom.xml
+RUN mvn install:install-file -Dfile=/app-root/pom.xml -DgroupId=com.booktracker \
+    -DartifactId=booktracker-parent -Dversion=1.0.0-SNAPSHOT -Dpackaging=pom
+
+# Copier le service
+COPY auth-service /app
+
+# Lancer avec spring-boot:run (sans compilation complète)
+CMD ["mvn", "spring-boot:run"]

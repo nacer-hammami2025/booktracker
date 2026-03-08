@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://reco-db:5432/reco_db}
+    username: ${SPRING_DATASOURCE_USERNAME:reco_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:reco_password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+
+book-service:
+  url: ${BOOK_SERVICE_URL:http://book-service:8082}
+
+tracker-service:
+  url: ${TRACKER_SERVICE_URL:http://tracker-service:8083}
+
+logging:
+  level:
+    root: INFO
+    com.booktracker.reco: INFO

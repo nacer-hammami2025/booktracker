@@ -1,0 +1,208 @@
+services:
+  # PostgreSQL - Auth Database
+  auth-db:
+    image: postgres:16-alpine
+    container_name: booktracker-auth-db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    networks:
+      - booktracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Auth Service (Port 9081)
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.auth
+    container_name: booktracker-auth-service
+    ports:
+      - "9081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/auth_db
+      - SPRING_DATASOURCE_USERNAME=auth_user
+      - SPRING_DATASOURCE_PASSWORD=auth_password
+      - JWT_SECRET=booktracker-super-secret-key-change-in-production-minimum-256-bits
+      - JWT_EXPIRATION=86400000
+    networks:
+      - booktracker-network
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # API Gateway (Port 9080)
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    container_name: booktracker-gateway
+    ports:
+      - "9080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - BOOK_SERVICE_URL=http://book-service:8082
+      - TRACKER_SERVICE_URL=http://tracker-service:8083
+      - RECO_SERVICE_URL=http://reco-service:8084
+      - JWT_SECRET=booktracker-super-secret-key-change-in-production-minimum-256-bits
+    networks:
+      - booktracker-network
+    depends_on:
+      - auth-service
+      - book-service
+      - tracker-service
+      - reco-service
+    restart: unless-stopped
+
+  # PostgreSQL - Book Database
+  book-db:
+    image: postgres:16-alpine
+    container_name: booktracker-book-db
+    environment:
+      POSTGRES_DB: book_db
+      POSTGRES_USER: book_user
+      POSTGRES_PASSWORD: book_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - book-db-data:/var/lib/postgresql/data
+    networks:
+      - booktracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U book_user -d book_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Book Service (Port 8082)
+  book-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.book
+    container_name: booktracker-book-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://book-db:5432/book_db
+      - SPRING_DATASOURCE_USERNAME=book_user
+      - SPRING_DATASOURCE_PASSWORD=book_password
+    networks:
+      - booktracker-network
+    depends_on:
+      book-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # PostgreSQL - Tracker Database  
+  tracker-db:
+    image: postgres:16-alpine
+    container_name: booktracker-tracker-db
+    environment:
+      POSTGRES_DB: tracker_db
+      POSTGRES_USER: tracker_user
+      POSTGRES_PASSWORD: tracker_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - tracker-db-data:/var/lib/postgresql/data
+    networks:
+      - booktracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker_user -d tracker_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Tracker Service (Port 8083)
+  tracker-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.tracker
+    container_name: booktracker-tracker-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://tracker-db:5432/tracker_db
+      - SPRING_DATASOURCE_USERNAME=tracker_user
+      - SPRING_DATASOURCE_PASSWORD=tracker_password
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - BOOK_SERVICE_URL=http://book-service:8082
+    networks:
+      - booktracker-network
+    depends_on:
+      tracker-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      book-service:
+        condition: service_started
+    restart: unless-stopped
+
+  # PostgreSQL - Reco Database
+  reco-db:
+    image: postgres:16-alpine
+    container_name: booktracker-reco-db
+    environment:
+      POSTGRES_DB: reco_db
+      POSTGRES_USER: reco_user
+      POSTGRES_PASSWORD: reco_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - reco-db-data:/var/lib/postgresql/data
+    networks:
+      - booktracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reco_user -d reco_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Reco Service (Port 8084)
+  reco-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.reco
+    container_name: booktracker-reco-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://reco-db:5432/reco_db
+      - SPRING_DATASOURCE_USERNAME=reco_user
+      - SPRING_DATASOURCE_PASSWORD=reco_password
+      - TRACKER_SERVICE_URL=http://tracker-service:8083
+      - BOOK_SERVICE_URL=http://book-service:8082
+    networks:
+      - booktracker-network
+    depends_on:
+      reco-db:
+        condition: service_healthy
+      tracker-service:
+        condition: service_started
+      book-service:
+        condition: service_started
+    restart: unless-stopped
+
+networks:
+  booktracker-network:
+    driver: bridge
+
+volumes:
+  auth-db-data:
+  book-db-data:
+  tracker-db-data:
+  reco-db-data:

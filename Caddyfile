@@ -1,0 +1,54 @@
+# Caddy Configuration for BookTracker
+# Automatic HTTPS with Let's Encrypt
+
+nacer-dev.me {
+    # Reverse proxy to frontend
+    reverse_proxy booktracker-frontend:80
+    
+    # Enable gzip compression
+    encode gzip zstd
+    
+    # Security headers
+    header {
+        # Prevent clickjacking
+        X-Frame-Options "SAMEORIGIN"
+        
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        
+        # Enable XSS protection
+        X-XSS-Protection "1; mode=block"
+        
+        # HSTS - Force HTTPS for 1 year
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        
+        # Referrer Policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        # Remove Server header
+        -Server
+    }
+    
+    # Logging
+    log {
+        output file /var/log/caddy/booktracker-access.log {
+            roll_size 100mb
+            roll_keep 10
+            roll_keep_for 720h
+        }
+        format json
+    }
+    
+    # Custom error pages
+    handle_errors {
+        @502 expression `{err.status_code} == 502`
+        handle @502 {
+            respond "Service Temporarily Unavailable. Please try again in a moment." 502
+        }
+    }
+}
+
+# Redirect www to non-www
+www.nacer-dev.me {
+    redir https://nacer-dev.me{uri} permanent
+}

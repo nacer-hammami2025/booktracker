@@ -1,0 +1,17 @@
+# Version simplifiée - Build complet en une seule commande
+FROM maven:3.9-eclipse-temurin-17-alpine AS build
+
+# Copier tout le projet
+WORKDIR /workspace
+COPY . .
+
+# Build seulement auth-service
+WORKDIR /workspace
+RUN mvn clean install -pl auth-service -am -DskipTests
+
+# Run stage
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /workspace/auth-service/target/*.jar app.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "app.jar"]

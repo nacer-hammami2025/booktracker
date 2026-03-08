@@ -1,0 +1,248 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Infrastructure Services
+  # ============================================
+  
+  # PostgreSQL - Auth Database
+  auth-db:
+    image: postgres:16-alpine
+    container_name: booktracker-auth-db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    networks:
+      - booktracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # PostgreSQL - Book Database
+  book-db:
+    image: postgres:16-alpine
+    container_name: booktracker-book-db
+    environment:
+      POSTGRES_DB: book_db
+      POSTGRES_USER: book_user
+      POSTGRES_PASSWORD: ${BOOK_DB_PASSWORD}
+    volumes:
+      - book-db-data:/var/lib/postgresql/data
+      - ./init-books.sql:/docker-entrypoint-initdb.d/init-books.sql
+    networks:
+      - booktracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U book_user -d book_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # PostgreSQL - Tracker Database
+  tracker-db:
+    image: postgres:16-alpine
+    container_name: booktracker-tracker-db
+    environment:
+      POSTGRES_DB: tracker_db
+      POSTGRES_USER: tracker_user
+      POSTGRES_PASSWORD: ${TRACKER_DB_PASSWORD}
+    volumes:
+      - tracker-db-data:/var/lib/postgresql/data
+      - ./init-tracker.sql:/docker-entrypoint-initdb.d/init-tracker.sql
+    networks:
+      - booktracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker_user -d tracker_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # PostgreSQL - Reco Database
+  reco-db:
+    image: postgres:16-alpine
+    container_name: booktracker-reco-db
+    environment:
+      POSTGRES_DB: reco_db
+      POSTGRES_USER: reco_user
+      POSTGRES_PASSWORD: ${RECO_DB_PASSWORD}
+    volumes:
+      - reco-db-data:/var/lib/postgresql/data
+    networks:
+      - booktracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reco_user -d reco_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # Redis - Recommendations Cache
+  redis:
+    image: redis:7-alpine
+    container_name: booktracker-redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - booktracker-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # ============================================
+  # Microservices
+  # ============================================
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: booktracker-gateway
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - BOOK_SERVICE_URL=http://book-service:8082
+      - TRACKER_SERVICE_URL=http://tracker-service:8083
+      - RECO_SERVICE_URL=http://reco-service:8084
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - booktracker-network
+    depends_on:
+      - auth-service
+      - book-service
+      - tracker-service
+      - reco-service
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: booktracker-auth-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/auth_db
+      - SPRING_DATASOURCE_USERNAME=auth_user
+      - SPRING_DATASOURCE_PASSWORD=${AUTH_DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=86400000
+    networks:
+      - booktracker-network
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    restart: always
+
+  # Book Service
+  book-service:
+    build:
+      context: .
+      dockerfile: book-service/Dockerfile
+    container_name: booktracker-book-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://book-db:5432/book_db
+      - SPRING_DATASOURCE_USERNAME=book_user
+      - SPRING_DATASOURCE_PASSWORD=${BOOK_DB_PASSWORD}
+      - GOOGLE_BOOKS_API_KEY=${GOOGLE_BOOKS_API_KEY:-}
+    networks:
+      - booktracker-network
+    depends_on:
+      book-db:
+        condition: service_healthy
+    restart: always
+
+  # Tracker Service
+  tracker-service:
+    build:
+      context: .
+      dockerfile: tracker-service/Dockerfile
+    container_name: booktracker-tracker-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://tracker-db:5432/tracker_db
+      - SPRING_DATASOURCE_USERNAME=tracker_user
+      - SPRING_DATASOURCE_PASSWORD=${TRACKER_DB_PASSWORD}
+      - BOOK_SERVICE_URL=http://book-service:8082
+    networks:
+      - booktracker-network
+    depends_on:
+      tracker-db:
+        condition: service_healthy
+    restart: always
+
+  # Reco Service
+  reco-service:
+    build:
+      context: .
+      dockerfile: reco-service/Dockerfile
+    container_name: booktracker-reco-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://reco-db:5432/reco_db
+      - SPRING_DATASOURCE_USERNAME=reco_user
+      - SPRING_DATASOURCE_PASSWORD=${RECO_DB_PASSWORD}
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - BOOK_SERVICE_URL=http://book-service:8082
+      - TRACKER_SERVICE_URL=http://tracker-service:8083
+    networks:
+      - booktracker-network
+    depends_on:
+      reco-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+
+  # ============================================
+  # Frontend
+  # ============================================
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: booktracker-frontend
+    ports:
+      - "80:80"
+    networks:
+      - booktracker-network
+    depends_on:
+      - api-gateway
+    restart: always
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  booktracker-network:
+    driver: bridge
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  auth-db-data:
+  book-db-data:
+  tracker-db-data:
+  reco-db-data:
+  redis-data:
