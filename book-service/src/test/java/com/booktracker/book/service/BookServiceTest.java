@@ -184,8 +184,6 @@ class BookServiceTest {
                 .build();
 
         when(bookRepository.findById(1L)).thenReturn(Optional.of(testBook));
-        when(authorRepository.findByName(anyString())).thenReturn(Optional.of(testAuthor));
-        when(genreRepository.findByName(anyString())).thenReturn(Optional.of(testGenre));
         when(bookRepository.save(any(Book.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // When
@@ -201,14 +199,14 @@ class BookServiceTest {
     @Test
     void deleteBook_WhenBookExists_ShouldDeleteBook() {
         // Given
-        when(bookRepository.findById(1L)).thenReturn(Optional.of(testBook));
-        doNothing().when(bookRepository).delete(any(Book.class));
+        when(bookRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(bookRepository).deleteById(1L);
 
         // When
         bookService.deleteBook(1L);
 
         // Then
-        verify(bookRepository).delete(testBook);
+        verify(bookRepository).deleteById(1L);
     }
 
     @Test
