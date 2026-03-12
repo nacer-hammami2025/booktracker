@@ -1,0 +1,55 @@
+# Caddy Configuration for BookTracker
+# Place this in /etc/caddy/Caddyfile on your server
+
+# Main domain - your existing site
+nacer-dev.me {
+    # Your existing configuration here
+    # Don't modify this part
+}
+
+# BookTracker subdomain
+booktracker.nacer-dev.me {
+    # Frontend - Static files
+    root * /var/www/booktracker/frontend/dist
+    file_server
+    
+    # SPA routing - redirect all to index.html
+    try_files {path} /index.html
+    
+    # API Gateway reverse proxy
+    reverse_proxy /api/* localhost:8080
+    
+    # Enable compression
+    encode gzip zstd
+    
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer-when-downgrade"
+    }
+    
+    # HTTPS automatic with Let's Encrypt
+    tls {
+        protocols tls1.2 tls1.3
+    }
+    
+    # Logging
+    log {
+        output file /var/log/caddy/booktracker.log
+        format json
+    }
+}
+
+# Direct API access (optional)
+api.booktracker.nacer-dev.me {
+    reverse_proxy localhost:8080
+    
+    # CORS headers
+    header {
+        Access-Control-Allow-Origin "https://booktracker.nacer-dev.me"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization, X-User-Id"
+    }
+}
