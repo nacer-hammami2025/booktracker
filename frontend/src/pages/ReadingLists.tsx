@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Plus, Trash2, BookOpen } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Card from '@/components/Card'
@@ -10,6 +11,7 @@ import { readingListService } from '@/services/readingListService'
 import type { ReadingList } from '@/types'
 
 export default function ReadingLists() {
+  const navigate = useNavigate()
   const [lists, setLists] = useState<ReadingList[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -99,7 +101,16 @@ export default function ReadingLists() {
 
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">{list.bookCount} livres</span>
-                <Button variant="outline" size="sm">Voir</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    navigate(`/lists/${list.id}`)
+                  }}
+                >
+                  Voir
+                </Button>
               </div>
             </Card>
           ))}

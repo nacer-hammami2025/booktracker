@@ -4,6 +4,7 @@ import { BookOpen } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
+import WelcomeAnimation from '@/components/WelcomeAnimation'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -11,6 +12,8 @@ export default function Register() {
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
+  const [welcomeUsername, setWelcomeUsername] = useState('')
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -53,8 +56,8 @@ export default function Register() {
       const { username, email, password } = formData
       const response = await authService.register({ username, email, password })
       setAuth(response.user, response.token)
-      toast.success('Compte créé avec succès!')
-      navigate('/')
+      setWelcomeUsername(response.user.username)
+      setShowWelcome(true)
     } catch (error: any) {
       const message = error.response?.data?.message || 'Erreur lors de l\'inscription'
       toast.error(message)
@@ -180,6 +183,14 @@ export default function Register() {
           </p>
         </div>
       </div>
+
+      {/* Animation de bienvenue spectaculaire */}
+      {showWelcome && (
+        <WelcomeAnimation
+          username={welcomeUsername}
+          onComplete={() => navigate('/')}
+        />
+      )}
     </div>
   )
 }

@@ -1,7 +1,10 @@
 import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 
+// API Base URL: Use environment variable or fallback to /api for local dev
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -29,8 +32,9 @@ api.interceptors.request.use(
           // Clean up corrupted data
           localStorage.removeItem('user')
         }
-      } catch (e) {
+      } catch (error) {
         // Clean up corrupted data silently
+        console.error('Error parsing user data:', error)
         localStorage.removeItem('user')
       }
     }

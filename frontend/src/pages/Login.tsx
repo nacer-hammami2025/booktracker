@@ -4,6 +4,7 @@ import { BookOpen } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
+import WelcomeAnimation from '@/components/WelcomeAnimation'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -11,6 +12,8 @@ export default function Login() {
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
+  const [welcomeUsername, setWelcomeUsername] = useState('')
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -25,8 +28,8 @@ export default function Login() {
     try {
       const response = await authService.login(formData)
       setAuth(response.user, response.token)
-      toast.success('Connexion réussie!')
-      navigate('/')
+      setWelcomeUsername(response.user.username)
+      setShowWelcome(true)
     } catch (error: any) {
       const message = error.response?.data?.message || 'Identifiants invalides'
       toast.error(message)
@@ -65,16 +68,16 @@ export default function Login() {
               <BookOpen className="w-10 h-10 text-white" />
             </div>
           </div>
-          <h1 className="text-5xl font-black text-gray-900 mb-2">
+          <h1 className="text-5xl font-black text-gray-900 dark:text-gray-100 mb-2">
             BookTracker
           </h1>
-          <p className="text-gray-700 font-medium text-lg">Suivez vos lectures avec passion</p>
+          <p className="text-gray-700 dark:text-gray-300 font-medium text-lg">Suivez vos lectures avec passion</p>
         </div>
 
         {/* Card moderne et claire */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Bienvenue !</h2>
-          <p className="text-gray-600 mb-8">Connectez-vous à votre compte</p>
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50 dark:border-gray-700/50">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Bienvenue !</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">Connectez-vous à votre compte</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -136,6 +139,14 @@ export default function Login() {
           </p>
         </div>
       </div>
+
+      {/* Animation de bienvenue spectaculaire */}
+      {showWelcome && (
+        <WelcomeAnimation
+          username={welcomeUsername}
+          onComplete={() => navigate('/')}
+        />
+      )}
     </div>
   )
 }

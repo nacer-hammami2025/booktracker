@@ -1,12 +1,41 @@
 # 📚 BookTracker - Plateforme de Suivi de Lecture
 
-**Projet de Fin d'Année (PFA) - 2 mois**  
-**Auteur**: Mohamed Nacer Hammami  
-**Architecture**: Microservices avec Spring Boot 3.2.3 & Java 17
+**Projet de Fin d'Année (PFA) - Mars 2026**  
+**Auteurs**: Mohamed Nacer Hammami & Dhia Ben Saidane  
+**Architecture**: Microservices avec Spring Boot 3.2.3 & **Java 21 LTS**
+
+> 🚀 **Upgradé vers Java 21 LTS** le 8 Mars 2026  
+> ✨ **UI Modernisée** avec React 18, Framer Motion & Recharts
 
 ## 🎯 Vue d'Ensemble
 
 BookTracker est une plateforme complète de gestion et suivi de lecture développée selon une architecture microservices moderne. Le projet permet aux utilisateurs de cataloguer leurs livres, suivre leur progression de lecture, créer des listes personnalisées, recevoir des recommandations intelligentes et visualiser des statistiques détaillées.
+
+---
+
+## 🌐 Déploiement Rapide
+
+**⚡ Déployer votre application sur `https://booktracker.nacer-dev.me` en 30 minutes:**
+
+```powershell
+# 1. Vérifier que tout compile
+.\quick-deploy.ps1
+
+# 2. Push sur GitHub
+git add .
+git commit -m "Ready for production 🚀"
+git push origin main
+
+# 3. Déployer sur Render.com (via interface web)
+# Voir: DEPLOY_EXPRESS.md
+```
+
+📖 **Guides de déploiement:**
+- [DEPLOY_EXPRESS.md](./DEPLOY_EXPRESS.md) - Déploiement en 3 commandes (30 min)
+- [RENDER_DEPLOY.md](./RENDER_DEPLOY.md) - Guide détaillé complet
+- [DEPLOY_RENDER_QUICK.md](./DEPLOY_RENDER_QUICK.md) - Résumé rapide
+
+---
 
 ## 🏗️ Architecture Technique
 
@@ -36,39 +65,66 @@ BookTracker est une plateforme complète de gestion et suivi de lecture dévelop
 
 ### Technologies
 
-- **Backend**: Java 17, Spring Boot 3.2.3, Spring Cloud Gateway
-- **Base de données**: PostgreSQL 16 (Database per Service)
-- **Cache**: Redis 7 (Recommandations et statistiques)
-- **Sécurité**: JWT (HS256), BCrypt (strength 12)
-- **Communication**: OpenFeign (REST inter-services)
-- **Documentation**: SpringDoc OpenAPI (Swagger UI)
-- **Conteneurisation**: Docker Compose
-- **Tests**: JUnit 5, Mockito, AssertJ
+**Backend:**
+- **Java 21 LTS** ☕ (Virtual Threads, Pattern Matching, Records)
+- **Spring Boot 3.2.3** 🍃 (Native Compilation Ready)
+- **Spring Cloud Gateway** 🚪 (API Gateway & Routing)
+- **PostgreSQL 16** 🐘 (Database per Service)
+- **Redis 7** 🚀 (Cache & Recommendations)
+
+**Frontend:**
+- **React 18** ⚛️ (TypeScript)
+- **Framer Motion** ✨ (Animations)
+- **Recharts** 📊 (Data Visualization)
+- **Tailwind CSS** 🎨 (Styling)
+- **Vite** ⚡ (Build Tool)
+
+**DevOps & Sécurité:**
+- **Docker & Docker Compose** 🐳
+- **JWT** 🔐 (HS256), **BCrypt** (strength 12)
+- **OpenFeign** 🔗 (REST inter-services)
+- **SpringDoc OpenAPI** 📋 (Swagger UI)
+- **JUnit 5**, **Mockito**, **AssertJ** ✅
 
 ## 🚀 Démarrage Rapide
 
 ### Prérequis
 
-- Java 17+
+- **Java 21 LTS** (requis)
 - Maven 3.8+
 - Docker & Docker Compose
+- Node.js 18+ (pour frontend)
 
-### Lancement
+### Lancement Local
 
-```bash
-# Cloner le projet
-git clone <repo-url>
-cd JavaProjectA
+```powershell
+# Option 1: Script automatique (recommandé)
+.\start.ps1
 
-# Build + démarrage de tous les services
+# Option 2: Docker Compose
 docker-compose up --build -d
+
+# Option 3: Manuel (dev mode)
+# Backend: mvn spring-boot:run dans chaque service
+# Frontend: cd frontend && npm run dev
 
 # Vérifier les logs
 docker-compose logs -f
 
 # Arrêter
-docker-compose down
+.\stop.ps1
+# ou: docker-compose down
 ```
+
+### URLs Locales
+
+- 🎨 **Frontend**: http://localhost:3000
+- 🚪 **API Gateway**: http://localhost:8080
+- 📋 **Swagger UI**: http://localhost:8080/swagger-ui.html
+- 🔐 **Auth Service**: http://localhost:8081
+- 📚 **Book Service**: http://localhost:8082
+- 📊 **Tracker Service**: http://localhost:8083
+- 🤖 **Reco Service**: http://localhost:8084
 
 ### URLs d'accès
 

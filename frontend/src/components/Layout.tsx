@@ -1,6 +1,7 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { BookOpen, Library, List, TrendingUp, BarChart3, User, LogOut } from 'lucide-react'
+import { BookOpen, Library, List, TrendingUp, BarChart3, LogOut, Code2 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
+import ThemeToggle from './ThemeToggle'
 
 export default function Layout() {
   const { user, clearAuth } = useAuthStore()
@@ -12,6 +13,7 @@ export default function Layout() {
     { name: 'Mes Listes', to: '/lists', icon: List },
     { name: 'Recommandations', to: '/recommendations', icon: TrendingUp },
     { name: 'Statistiques', to: '/statistics', icon: BarChart3 },
+    { name: 'Technologies', to: '/technologies', icon: Code2 },
   ]
 
   const handleLogout = () => {
@@ -20,9 +22,9 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
       {/* Header avec design premium */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-18 py-3">
             <div className="flex items-center gap-3">
@@ -33,14 +35,15 @@ export default function Layout() {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
                   BookTracker
                 </h1>
-                <p className="text-xs text-gray-500 font-medium">Votre compagnon de lecture</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Votre compagnon de lecture</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
+              <ThemeToggle />
               <NavLink
                 to="/profile"
-                className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-500"
+                className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 transition-all duration-500"
               >
                 <div className="relative w-14 h-14">
                   {/* Orbites animées */}
@@ -68,9 +71,9 @@ export default function Layout() {
                 </div>
                 
                 <div className="flex flex-col">
-                  <span className="text-sm font-bold text-gray-800 group-hover:text-indigo-600 transition-colors duration-300">{user?.username}</span>
-                  <span className="text-xs text-gray-500 group-hover:text-purple-600 transition-colors duration-300 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span className="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 transition-colors duration-300">{user?.username}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-purple-600 transition-colors duration-300 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>{' '}
                     En ligne
                   </span>
                 </div>
@@ -78,7 +81,7 @@ export default function Layout() {
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-red-50 text-red-600 transition-all font-medium"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-all font-medium"
               >
                 <LogOut className="w-5 h-5" />
                 <span className="text-sm">Déconnexion</span>
@@ -89,7 +92,7 @@ export default function Layout() {
       </header>
 
       {/* Navigation moderne */}
-      <nav className="bg-white/60 backdrop-blur-sm border-b border-gray-200/50 sticky top-18 z-40">
+      <nav className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 sticky top-18 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-2 overflow-x-auto py-2">
             {navigation.map((item) => (
@@ -101,7 +104,7 @@ export default function Layout() {
                   `flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                     isActive
                       ? 'bg-gradient-to-r from-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
                   }`
                 }
               >

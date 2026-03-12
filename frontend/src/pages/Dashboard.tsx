@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, Heart, TrendingUp, Target } from 'lucide-react'
-import Card from '@/components/Card'
+import { motion } from 'framer-motion'
+import { BookOpen, Heart, TrendingUp, Target, BarChart3, PieChart } from 'lucide-react'
+import { PieChart as RechartsPie, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import UserBookCard from '@/components/UserBookCard'
 import BookCard from '@/components/BookCard'
@@ -39,6 +40,22 @@ export default function Dashboard() {
   }
 
   if (isLoading) return <LoadingSpinner />
+
+  // Prepare chart data
+  const statusData = [
+    { name: 'En cours', value: stats?.reading || 0, color: '#3b82f6' },
+    { name: 'Terminés', value: stats?.finished || 0, color: '#10b981' },
+    { name: 'À lire', value: stats?.toRead || 0, color: '#8b5cf6' },
+    { name: 'Abandonnés', value: stats?.abandoned || 0, color: '#ef4444' },
+  ].filter(item => item.value > 0)
+
+  const progressData = [
+    { month: 'Jan', livres: 2 },
+    { month: 'Fév', livres: 3 },
+    { month: 'Mar', livres: stats?.finished || 0 },
+  ]
+
+  const COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#ef4444']
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -179,6 +196,143 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Analytics Section with Charts */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="grid md:grid-cols-2 gap-6 mb-8"
+      >
+        {/* Pie Chart - Distribution par statut */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-xl">
+              <PieChart className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">Distribution des livres</h3>
+          </div>
+          
+          {statusData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <RechartsPie>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  animationBegin={0}
+                  animationDuration={800}
+                >
+                  {statusData.map((_, index) => (
+                    <Cell key={`status-${statusData[index].name}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </RechartsPie>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-gray-400">
+              <div className="text-center">
+                <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>Aucune donnée disponible</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bar Chart - Progression mensuelle */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-gradient-to-br from-blue-500 to-cyan-500 p-2 rounded-xl">
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">Progression 2026</h3>
+          </div>
+          
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={progressData}>
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip 
+                contentStyle={{ 
+                  background: 'white', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <Bar 
+                dataKey="livres" 
+                fill="url(#colorGradient)" 
+                radius={[8, 8, 0, 0]}
+                animationBegin={0}
+                animationDuration={800}
+              />
+              <defs>
+                <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.8} />
+                </linearGradient>
+              </defs>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
+
+      {/* Quick Stats Cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+      >
+        {[
+          { 
+            label: 'Taux de complétion', 
+            value: stats?.total ? `${Math.round((stats.finished / stats.total) * 100)}%` : '0%',
+            icon: Target,
+            gradient: 'from-emerald-500 to-green-500'
+          },
+          { 
+            label: 'Pages estimées', 
+            value: `${(stats?.finished || 0) * 300}`,
+            icon: BookOpen,
+            gradient: 'from-blue-500 to-cyan-500'
+          },
+          { 
+            label: 'Livres favoris', 
+            value: stats?.total || 0,
+            icon: Heart,
+            gradient: 'from-rose-500 to-pink-500'
+          },
+          { 
+            label: 'Objectif annuel', 
+            value: '20 livres',
+            icon: TrendingUp,
+            gradient: 'from-purple-500 to-indigo-500'
+          },
+        ].map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.7 + index * 0.1 }}
+            whileHover={{ scale: 1.05, y: -5 }}
+            className="bg-white rounded-xl p-4 shadow-lg border border-gray-200 hover:shadow-xl transition-all"
+          >
+            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.gradient} flex items-center justify-center mb-3`}>
+              <stat.icon className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-2xl font-black text-gray-900 mb-1">{stat.value}</div>
+            <div className="text-xs text-gray-500 font-medium">{stat.label}</div>
+          </motion.div>
+        ))}
+      </motion.div>
+
       {/* Recent Books */}
       <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
         <div className="flex items-center justify-between mb-6">
@@ -189,7 +343,7 @@ export default function Dashboard() {
             onClick={() => navigate('/library')}
             className="text-primary-600 hover:text-primary-700 font-semibold text-sm flex items-center gap-1 hover:gap-2 transition-all"
           >
-            Voir tout 
+            Voir tout{' '}
             <span className="text-lg">→</span>
           </button>
         </div>
@@ -233,7 +387,7 @@ export default function Dashboard() {
               onClick={() => navigate('/recommendations')}
               className="text-primary-600 hover:text-primary-700 font-semibold text-sm flex items-center gap-1 hover:gap-2 transition-all"
             >
-              Voir tout
+              Voir tout{' '}
               <span className="text-lg">→</span>
             </button>
           </div>

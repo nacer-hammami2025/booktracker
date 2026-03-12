@@ -71,12 +71,36 @@ spring:
             - AuthenticationFilter
         
         # ==================== TRACKER SERVICE ====================
+        - id: tracker-service-user-books
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/user-books/**
+          filters:
+            - RewritePath=/api/user-books/(?<segment>.*), /api/user-books/$\{segment}
+            - AuthenticationFilter
+        
+        - id: tracker-service-reviews
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/reviews/**
+          filters:
+            - RewritePath=/api/reviews/(?<segment>.*), /api/reviews/$\{segment}
+            - AuthenticationFilter
+        
+        - id: tracker-service-reading-lists
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/reading-lists/**
+          filters:
+            - RewritePath=/api/reading-lists/(?<segment>.*), /api/reading-lists/$\{segment}
+            - AuthenticationFilter
+        
         - id: tracker-service
           uri: http://localhost:8083
           predicates:
             - Path=/api/tracker/**
           filters:
-            - RewritePath=/api/tracker/(?<segment>.*), /api/tracker/$\{segment}
+            - RewritePath=/api/tracker/(?<segment>.*), /api/$\{segment}
             - AuthenticationFilter
         
         # ==================== RECO SERVICE ====================

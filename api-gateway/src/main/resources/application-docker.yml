@@ -61,12 +61,20 @@ spring:
             - RewritePath=/api/reviews/(?<segment>.*), /api/reviews/$\{segment}
             - Authentication
         
+        - id: tracker-service-reading-lists
+          uri: ${TRACKER_SERVICE_URL:http://tracker-service:8083}
+          predicates:
+            - Path=/api/reading-lists/**
+          filters:
+            - RewritePath=/api/reading-lists/(?<segment>.*), /api/reading-lists/$\{segment}
+            - Authentication
+        
         - id: tracker-service
           uri: ${TRACKER_SERVICE_URL:http://tracker-service:8083}
           predicates:
             - Path=/api/tracker/**
           filters:
-            - RewritePath=/api/tracker/(?<segment>.*), /api/tracker/$\{segment}
+            - RewritePath=/api/tracker/(?<segment>.*), /api/$\{segment}
             - Authentication
         
         # ==================== RECO SERVICE ====================

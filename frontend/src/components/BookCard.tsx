@@ -20,23 +20,23 @@ export default function BookCard({ book }: Readonly<BookCardProps>) {
           className="w-full h-48 object-cover rounded-lg mb-4"
         />
       ) : (
-        <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
-          <BookOpen className="w-12 h-12 text-gray-400" />
+        <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
+          <BookOpen className="w-12 h-12 text-gray-400 dark:text-gray-500" />
         </div>
       )}
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1 line-clamp-2">
         {book.title}
       </h3>
 
       {book.authors && book.authors.length > 0 && (
-        <p className="text-sm text-gray-600 mb-2">
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
           {book.authors.join(', ')}
         </p>
       )}
 
       {book.description && (
-        <p className="text-sm text-gray-500 line-clamp-3">
+        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3">
           {truncate(book.description, 150)}
         </p>
       )}
@@ -46,7 +46,7 @@ export default function BookCard({ book }: Readonly<BookCardProps>) {
           {book.genres.slice(0, 3).map((genre) => (
             <span
               key={genre}
-              className="px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded"
+              className="px-2 py-1 bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 text-xs rounded"
             >
               {genre}
             </span>

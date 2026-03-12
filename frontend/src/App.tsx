@@ -12,9 +12,11 @@ import Catalog from '@/pages/Catalog'
 import BookDetails from '@/pages/BookDetails'
 import Library from '@/pages/Library'
 import ReadingLists from '@/pages/ReadingLists'
+import ReadingListDetail from '@/pages/ReadingListDetail'
 import Recommendations from '@/pages/Recommendations'
 import Statistics from '@/pages/Statistics'
 import Profile from '@/pages/Profile'
+import Technologies from '@/pages/Technologies'
 
 // Protected Route wrapper
 interface RouteWrapperProps {
@@ -51,8 +53,10 @@ function App() {
           <Route path="books/:id" element={<BookDetails />} />
           <Route path="library" element={<Library />} />
           <Route path="lists" element={<ReadingLists />} />
+          <Route path="lists/:id" element={<ReadingListDetail />} />
           <Route path="recommendations" element={<Recommendations />} />
           <Route path="statistics" element={<Statistics />} />
+          <Route path="technologies" element={<Technologies />} />
           <Route path="profile" element={<Profile />} />
         </Route>
 
